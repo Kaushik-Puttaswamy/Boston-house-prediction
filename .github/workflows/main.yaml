@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,12 +23,17 @@ jobs:
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
+      - name: Ensure Heroku app uses container stack
+        run: heroku stack:set container -a ${{ secrets.HEROKU_APP_NAME }}
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
       - name: Build & Push Docker image
         run: |
           docker build -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
           docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
 
-      - name: Release to Heroku
+      - name: Release Docker container to Heroku
         run: heroku container:release web -a ${{ secrets.HEROKU_APP_NAME }}
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
